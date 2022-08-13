@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ activity }}</title>
+</head>
+<body>
+<form method="post" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table>
+        {{ form }}
+    </table>
+    <div>
+        <button>Save</button>
+        <a href="{% url 'activity' activity.id %}">Cancel</a>
+    </div>
+</form>
+</body>
+</html>

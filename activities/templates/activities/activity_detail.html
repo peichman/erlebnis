@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% load tz %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ activity }}</title>
+</head>
+<body>
+<h1>{{ activity }}</h1>
+<dl>
+    <dt>Type:</dt>
+    <dd>{{ activity.type }}</dd>
+    {% timezone "America/New_York" %}
+    <dt>Start time:</dt>
+    <dd>{{ activity.start_time }}</dd>
+    <dt>End time:</dt>
+    <dd>{{ activity.end_time }}</dd>
+    {% endtimezone %}
+    <dt>Locations:</dt>
+    <dd>
+        <ul>
+            {% for location in activity.location.all %}
+            <li>{{ location.name }}{% if location.type != 'Place' %} ({{ location.type }}){% endif %}</li>
+            {% endfor %}
+            {% for coordinates in activity.coordinates.all %}
+            <li>{{ coordinates.name }}: {{coordinates.latitude}}°, {{coordinates.longitude}}°</li>
+            {% endfor %}
+            {% for track in activity.tracks %}
+            <li>{{ track.name }}: {{track.latitude}}°, {{track.longitude}}°</li>
+            {% endfor %}
+        </ul>
+    </dd>
+    <dt>Participants:</dt>
+    <dd>
+        <ul>
+            {% for actor in activity.actor.all %}
+            <li>{{ actor.name }}{% if actor.type != 'Person' %} ({{ actor.type }}){% endif %}</li>
+            {% endfor %}
+        </ul>
+    </dd>
+    <dt>Attachments:</dt>
+    <dd>
+        {% if activity.gpx_file %}
+        <ul>
+            <li>{{ activity.gpx_file.name }} ({{ activity.gpx_file.size|filesizeformat }})</li>
+        </ul>
+        {% endif %}
+    </dd>
+</dl>
+<div>
+    <a href="{% url 'edit_activity' activity.id %}">Edit</a>
+</div>
+</body>
+</html>

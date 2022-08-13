@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Activities</title>
+</head>
+<body>
+<h1>Erlebnis</h1>
+    <h2>Activities</h2>
+    <ul>
+        {% for activity in activities %}
+            <li><a href="{% url 'activity' activity.id %}">{{ activity }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

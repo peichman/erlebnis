@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPX Tracks for {{ activity }}</title>
+</head>
+<body>
+<table border="1">
+    {% for track in activity.gpx.tracks %}
+    <tr>
+        <th colspan="4">Track {{ forloop.counter }}</th>
+    </tr>
+    {% for segment in track.segments %}
+    <tr>
+        <th colspan="4">Segment {{ forloop.counter }}</th>
+    </tr>
+    {% for point in segment.points %}
+    <tr>
+        <td>{{ point.time }}</td>
+        <td>{{ point.latitude }}</td>
+        <td>{{ point.longitude }}</td>
+        <td>{{ point.elevation }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+</table>
+</body>
+</html>
