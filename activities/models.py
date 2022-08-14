@@ -87,9 +87,34 @@ class Activity(models.Model):
             end_point = track.segments[0].points[-1]
             prefix = f'Track {n} ' if len(self.gpx.tracks) > 1 else ''
             locations.extend((
-                {'name': f'{prefix}Start', 'latitude': start_point.latitude, 'longitude': start_point.longitude},
-                {'name': f'{prefix}End', 'latitude': end_point.latitude, 'longitude': end_point.longitude},
+                {
+                    'type': 'Place',
+                    'name': f'{prefix}Start',
+                    'latitude': start_point.latitude,
+                    'longitude': start_point.longitude,
+                },
+                {
+                    'type': 'Place',
+                    'name': f'{prefix}End',
+                    'latitude': end_point.latitude,
+                    'longitude': end_point.longitude,
+                },
             ))
+        bounds = self.gpx.get_bounds()
+        locations.extend((
+            {
+                'type': 'Place',
+                'name': 'Southwest Bounding Point',
+                'latitude': bounds.min_latitude,
+                'longitude': bounds.min_longitude,
+            },
+            {
+                'type': 'Place',
+                'name': 'Northeast Bounding Point',
+                'latitude': bounds.max_latitude,
+                'longitude': bounds.max_longitude,
+            },
+        ))
         return locations
 
     @classmethod

@@ -48,7 +48,8 @@
     </dd>
 </dl>
 <div>
-    <a href="{% url 'edit_activity' activity.id %}">Edit</a>
+    <a href="{% url 'edit_activity' activity.id %}">Edit</a> |
+    <a href="{% url 'activity_stream' activity.id %}">JSON</a>
 </div>
 </body>
 </html>
