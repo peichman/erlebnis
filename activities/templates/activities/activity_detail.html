@@ -4,10 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ activity }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
 </head>
 <body>
 <h1>{{ activity }}</h1>
+<div id="map" style="float: right; width: 800px; height: 800px;"></div>
 <dl>
+    <dt>Identifier:</dt>
+    <dd>{{ activity.identifier }}</dd>
     <dt>Type:</dt>
     <dd>{{ activity.type }}</dd>
     {% timezone "America/New_York" %}
@@ -48,8 +52,23 @@
     </dd>
 </dl>
 <div>
-    <a href="{% url 'edit_activity' activity.id %}">Edit</a> |
-    <a href="{% url 'activity_stream' activity.id %}">JSON</a>
+  <a href="{% url 'activities_list' %}">Activities</a> |
+  <a href="{% url 'edit_activity' activity.id %}">Edit</a> |
+  <a href="{% url 'activity_stream' activity.id %}">JSON</a>
 </div>
+<script type="application/gpx+xml" id="gpx-data">{{ activity.gpx.to_xml }}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+<script>
+  var map = L.map('map');
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: 'Map data &copy; <a href="http://www.osm.org">OpenStreetMap</a>'
+}).addTo(map);
+ // URL to your GPX file or the GPX itself
+var gpx = document.getElementById('gpx-data').text.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&quot;', '"');
+new L.GPX(gpx, {async: true}).on('loaded', function(e) {
+  map.fitBounds(e.target.getBounds());
+}).addTo(map);
+</script>
 </body>
 </html>

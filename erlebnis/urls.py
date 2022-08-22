@@ -17,13 +17,14 @@ from django.contrib import admin
 from django.urls import path
 
 from activities.views import ActivityDetailView, ActivityEditView, ActivityListView, ActivityStreamView, \
-    ActivityTracksView
+    ActivityTracksView, ImportGPXFileView
 
 urlpatterns = [
     path('activities/<int:pk>/json', ActivityStreamView.as_view(), name='activity_stream'),
     path('activities/<int:pk>/tracks/', ActivityTracksView.as_view(), name='activity_tracks'),
     path('activities/<int:pk>/edit/', ActivityEditView.as_view(), name='edit_activity'),
     path('activities/<int:pk>/', ActivityDetailView.as_view(), name='activity'),
-    path('activities/', ActivityListView.as_view()),
+    path('activities/import', ImportGPXFileView.as_view(), name='import_gpx_file'),
+    path('activities/', ActivityListView.as_view(), name='activities_list'),
     path('admin/', admin.site.urls),
 ]

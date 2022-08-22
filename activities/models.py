@@ -56,10 +56,10 @@ class Activity(models.Model):
     identifier = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
     type = models.ForeignKey(ActivityType, on_delete=models.CASCADE)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    location = models.ManyToManyField(Place)
-    actor = models.ManyToManyField(Actor)
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+    location = models.ManyToManyField(Place, blank=True)
+    actor = models.ManyToManyField(Actor, blank=True)
     gpx_file = models.FileField(upload_to='gpx', null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
@@ -67,7 +67,10 @@ class Activity(models.Model):
         self._gpx = None
 
     def __str__(self):
-        return f'{self.type}: {self.name} ({self.start_time.date()})'
+        if self.start_time is not None:
+            return f'{self.type}: {self.name} ({self.start_time.date()})'
+        else:
+            return f'{self.type}: {self.name}'
 
     @property
     def gpx(self):
