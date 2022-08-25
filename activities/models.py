@@ -127,3 +127,13 @@ class Activity(models.Model):
         activity.name = gpx.name
         bounds = gpx.get_bounds()
         #gpx.tracks[0].segments[0].points
+
+
+class Attachment(models.Model):
+    activity = models.ForeignKey(Activity, related_name='attachments', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='attachments')
+    media_type = models.CharField(max_length=256)
+    rel = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.file.name

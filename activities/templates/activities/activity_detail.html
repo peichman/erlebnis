@@ -44,6 +44,11 @@
     </dd>
     <dt>Attachments:</dt>
     <dd>
+        <ul>
+            {% for attachment in activity.attachments.all %}
+            <li>{{ attachment.file.name }}</li>
+            {% endfor %}
+        </ul>
         {% if activity.gpx_file %}
         <ul>
             <li>{{ activity.gpx_file.name }} ({{ activity.gpx_file.size|filesizeformat }})</li>

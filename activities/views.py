@@ -59,15 +59,16 @@ class ActivityStreamView(ActivityDetailView):
                 {'name': actor.name, 'type': actor.type.name}
                 for actor in activity.actor.all()
             ],
-            'attachment': []
+            'attachment': [
+                {
+                    'type': 'Link',
+                    'href': attachment.file.name,
+                    'mediaType': attachment.media_type,
+                    'rel': attachment.rel,
+                }
+                for attachment in activity.attachments.all()
+            ]
         }
-        if activity.gpx_file:
-            activity_data['attachment'].append({
-                'type': 'Link',
-                'href': activity.gpx_file.name,
-                'rel': 'describedby',
-                'mediaType': 'application/gpx+xml',
-            })
         return JsonResponse(activity_data)
 
 
