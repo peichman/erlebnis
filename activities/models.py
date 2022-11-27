@@ -74,10 +74,11 @@ class Activity(models.Model):
 
     @property
     def gpx(self):
-        if not self.gpx_file:
-            return None
         if self._gpx is None:
-            self._gpx = gpxpy.parse(self.gpx_file)
+            attachment = self.attachments.filter(media_type__exact='application/gpx+xml').first()
+            if attachment is None:
+                return None
+            self._gpx = gpxpy.parse(attachment.file)
         return self._gpx
 
     @property
