@@ -11,5 +11,5 @@ class ActivityForm(ModelForm):
 
 
 class ImportGPXFileForm(Form):
-    activity_type = forms.ChoiceField(choices=ActivityType.objects.all().values_list('id', 'name'))
+    activity_type = forms.ModelChoiceField(queryset=ActivityType.objects.all())
     gpx_file = forms.FileField()
