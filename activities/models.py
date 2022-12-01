@@ -1,4 +1,4 @@
-from itertools import chain
+from os.path import basename
 
 import gpxpy
 from django.db import models
@@ -60,7 +60,6 @@ class Activity(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     location = models.ManyToManyField(Place, blank=True)
     actor = models.ManyToManyField(Actor, blank=True)
-    gpx_file = models.FileField(upload_to='gpx', null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,10 +73,11 @@ class Activity(models.Model):
 
     @property
     def gpx(self):
-        if not self.gpx_file:
-            return None
         if self._gpx is None:
-            self._gpx = gpxpy.parse(self.gpx_file)
+            attachment = self.attachments.filter(media_type__exact='application/gpx+xml').first()
+            if attachment is None:
+                return None
+            self._gpx = gpxpy.parse(attachment.file)
         return self._gpx
 
     @property
@@ -121,12 +121,28 @@ class Activity(models.Model):
         return locations
 
     @classmethod
-    def import_gpx(cls, file):
-        gpx = gpxpy.parse(file)
-        activity = cls()
-        activity.name = gpx.name
-        bounds = gpx.get_bounds()
-        #gpx.tracks[0].segments[0].points
+    def import_gpx(cls, gpx_file, activity_type):
+        gpx_basename = basename(gpx_file.name).replace('.gpx', '')
+        date, slug = gpx_basename.split('.')
+        gpx = gpxpy.parse(gpx_file)
+        start = gpx.tracks[0].segments[0].points[0]
+        end = gpx.tracks[-1].segments[-1].points[-1]
+        activity = cls(
+            type=activity_type,
+            identifier=f'{date}.{slug}#{activity_type}',
+            name=slug.replace('-', ' ').title(),
+            start_time=start.time,
+            end_time=end.time,
+        )
+        activity.save()
+        attachment = Attachment(
+            activity=activity,
+            file=gpx_file,
+            rel='describedby',
+            media_type='application/gpx+xml',
+        )
+        attachment.save()
+        return activity
 
 
 class Attachment(models.Model):

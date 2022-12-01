@@ -1,6 +1,3 @@
-from os.path import basename
-
-import gpxpy
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -8,7 +5,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from .forms import ActivityForm, ImportGPXFileForm
-from .models import Activity, ActivityType
+from .models import Activity
 
 
 class ActivityListView(ListView):
@@ -79,27 +76,14 @@ class ActivityTracksView(ActivityDetailView):
 class ImportGPXFileView(View):
     template_name = 'activities/import_gpx_file.html'
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *_args, **_kwargs):
         form = ImportGPXFileForm()
         return render(request, self.template_name, {'form': form})
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *_args, **_kwargs):
         form = ImportGPXFileForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             gpx_file = form.cleaned_data['gpx_file']
-            gpx_basename = basename(gpx_file.name).replace('.gpx', '')
-            date, slug, activity_type = gpx_basename.split('.', 3)
-            gpx = gpxpy.parse(gpx_file)
-            start = gpx.tracks[0].segments[0].points[0]
-            end = gpx.tracks[-1].segments[-1].points[-1]
-            activity = Activity(
-                type=ActivityType.objects.get(pk=form.cleaned_data['activity_type']),
-                identifier=f'{date}.{slug}#{activity_type}',
-                name=slug.replace('-', ' ').title(),
-                start_time=start.time,
-                end_time=end.time,
-                gpx_file=gpx_file,
-            )
-            activity.save()
+            activity_type = form.cleaned_data['activity_type']
+            activity = Activity.import_gpx(gpx_file, activity_type)
             return HttpResponseRedirect(reverse('edit_activity', kwargs={'pk': activity.id}))
-
