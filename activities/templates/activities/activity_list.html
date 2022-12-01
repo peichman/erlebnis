@@ -7,10 +7,31 @@
 <body>
 <h1>Erlebnis</h1>
     <h2>Activities</h2>
-    <ul>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Activity</th>
+            <th>Type</th>
+            <th>Location(s)</th>
+        </tr>
+        </thead>
         {% for activity in activities %}
-            <li><a href="{% url 'activity' activity.id %}">{{ activity }}</a></li>
+            <tr>
+                <td>
+                    <a href="{% url 'activity' activity.id %}">{{ activity.name }}</a>
+                </td>
+                <td>
+                    {{ activity.type }}
+                </td>
+                <td>
+                    <ul>
+                        {% for location in activity.location.all %}
+                        <li>{{ location.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
+    </table>
 </body>
 </html>
