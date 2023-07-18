@@ -4,11 +4,10 @@ import gpxpy
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, FormView
 
 from .forms import ActivityForm, ImportGPXFileForm
-from .models import Activity, ActivityType
+from .models import Activity, ActivityType, Attachment
 
 
 class ActivityListView(ListView):
@@ -76,30 +75,31 @@ class ActivityTracksView(ActivityDetailView):
     template_name = 'activities/activity_tracks.html'
 
 
-class ImportGPXFileView(View):
+class ImportGPXFileView(FormView):
     template_name = 'activities/import_gpx_file.html'
+    form_class = ImportGPXFileForm
 
-    def get(self, request, *args, **kwargs):
-        form = ImportGPXFileForm()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, *args, **kwargs):
-        form = ImportGPXFileForm(data=request.POST, files=request.FILES)
-        if form.is_valid():
-            gpx_file = form.cleaned_data['gpx_file']
-            gpx_basename = basename(gpx_file.name).replace('.gpx', '')
-            date, slug, activity_type = gpx_basename.split('.', 3)
-            gpx = gpxpy.parse(gpx_file)
-            start = gpx.tracks[0].segments[0].points[0]
-            end = gpx.tracks[-1].segments[-1].points[-1]
-            activity = Activity(
-                type=ActivityType.objects.get(pk=form.cleaned_data['activity_type']),
-                identifier=f'{date}.{slug}#{activity_type}',
-                name=slug.replace('-', ' ').title(),
-                start_time=start.time,
-                end_time=end.time,
-                gpx_file=gpx_file,
-            )
-            activity.save()
-            return HttpResponseRedirect(reverse('edit_activity', kwargs={'pk': activity.id}))
-
+    def form_valid(self, form):
+        gpx_file = form.cleaned_data['gpx_file']
+        gpx_basename = basename(gpx_file.name).replace('.gpx', '')
+        date, slug = gpx_basename.split('.')
+        gpx = gpxpy.parse(gpx_file)
+        start = gpx.tracks[0].segments[0].points[0]
+        end = gpx.tracks[-1].segments[-1].points[-1]
+        activity_type = ActivityType.objects.get(pk=form.cleaned_data['activity_type'])
+        activity = Activity(
+            type=activity_type,
+            identifier=f'{date}.{slug}#{str(activity_type).lower()}',
+            name=slug.replace('-', ' ').title(),
+            start_time=start.time,
+            end_time=end.time,
+        )
+        activity.save()
+        attachment = Attachment(
+            activity=activity,
+            file=gpx_file,
+            media_type='application/gpx+xml',
+            rel='describedby',
+        )
+        attachment.save()
+        return HttpResponseRedirect(reverse('edit_activity', kwargs={'pk': activity.id}))
